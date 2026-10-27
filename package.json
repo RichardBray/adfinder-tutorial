@@ -4,5 +4,11 @@
   "type": "module",
   "scripts": {
     "dev": "bun --hot server.ts"
+  },
+  "dependencies": {
+    "@mendable/firecrawl-js": "4.51.0"
+  },
+  "devDependencies": {
+    "@types/bun": "1.4.4"
   }
 }
