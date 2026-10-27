@@ -6,14 +6,15 @@
     <style>
       body { font-family: sans-serif; max-width: 960px; margin: 2rem auto; padding: 0 1rem; }
       .card { display: inline-block; vertical-align: top; width: 200px; margin: 8px; color: inherit; text-decoration: none; }
-      .card img { width: 100%; height: 260px; object-fit: cover; background: #eee; }
+      .card img, .no-preview { width: 100%; height: 260px; object-fit: contain; background: #eee; display: grid; place-items: center; }
     </style>
   </head>
   <body>
     <h1>Ad Finder</h1>
 
     <form id="search">
-      <input id="brand" placeholder="Brand name, e.g. Factor" />
+      <input id="brand" placeholder="Brand name, e.g. Factor" required />
+      <input id="domain" placeholder="Website, e.g. factor75.com" required />
       <button>Search</button>
     </form>
 

@@ -13,13 +13,7 @@ async function alexandria(...calls: AlexandriaCall[]): Promise<any[]> {
   });
 }
 
-async function findMetaAds(brand: string) {
-  const [advertisers] = await alexandria({
-    provider: "upspring",
-    capability: "advertisers/search",
-    options: { name: brand, limit: 1 },
-  });
-  const advertiser = advertisers?.data?.[0];
+async function browseMetaAds(advertiser: any) {
   if (!advertiser) return null;
 
   const [ads] = await alexandria({
@@ -35,9 +29,29 @@ const server = Bun.serve({
   routes: {
     "/": index,
     "/api/ads": async (req) => {
-      const brand = new URL(req.url).searchParams.get("q") ?? "";
-      const meta = await findMetaAds(brand);
-      return Response.json({ meta });
+      const params = new URL(req.url).searchParams;
+      const brand = params.get("q") ?? "";
+      const domain = params.get("domain") ?? "";
+
+      // Two datasets in one request: Upspring (Meta ads) and Google's Ads Transparency Center.
+      const [advertisers, google] = await alexandria(
+        {
+          provider: "upspring",
+          capability: "advertisers/search",
+          options: { name: brand, limit: 1 },
+        },
+        {
+          provider: "adstransparency-google-com",
+          capability: "ad-transparency/list_ads",
+          options: { domain, region: "anywhere", limit: 12 },
+        },
+      );
+
+      // Meta needs a second round trip: the ads lookup takes the advertiser id we just found.
+      const meta = await browseMetaAds(advertisers?.data?.[0]);
+      const googleAds = (google?.ads ?? []).sort((a: any, b: any) => b.days_shown - a.days_shown);
+
+      return Response.json({ meta, google: googleAds });
     },
   },
 });
